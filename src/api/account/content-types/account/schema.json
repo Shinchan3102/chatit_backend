@@ -4,7 +4,8 @@
   "info": {
     "singularName": "account",
     "pluralName": "accounts",
-    "displayName": "Account"
+    "displayName": "Account",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -12,13 +13,30 @@
   "pluginOptions": {},
   "attributes": {
     "username": {
-      "type": "string"
+      "type": "string",
+      "unique": true,
+      "required": true,
+      "minLength": 1
     },
     "email": {
-      "type": "email"
+      "type": "email",
+      "required": true,
+      "unique": true
     },
-    "token": {
-      "type": "string"
+    "password": {
+      "type": "string",
+      "required": true
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
     }
   }
 }

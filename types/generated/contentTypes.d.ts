@@ -368,14 +368,21 @@ export interface ApiAccountAccount extends Schema.CollectionType {
     singularName: 'account';
     pluralName: 'accounts';
     displayName: 'Account';
+    description: '';
   };
   options: {
     draftAndPublish: true;
   };
   attributes: {
-    username: Attribute.String;
-    email: Attribute.Email;
-    token: Attribute.String;
+    username: Attribute.String &
+      Attribute.Required &
+      Attribute.Unique &
+      Attribute.SetMinMaxLength<{
+        minLength: 1;
+      }>;
+    email: Attribute.Email & Attribute.Required & Attribute.Unique;
+    password: Attribute.String & Attribute.Required;
+    avatar: Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
@@ -387,6 +394,84 @@ export interface ApiAccountAccount extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::account.account',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiChatSessionChatSession extends Schema.CollectionType {
+  collectionName: 'chat_sessions';
+  info: {
+    singularName: 'chat-session';
+    pluralName: 'chat-sessions';
+    displayName: 'ChatSession';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    sessionName: Attribute.String & Attribute.Required;
+    user: Attribute.Relation<
+      'api::chat-session.chat-session',
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
+    messages: Attribute.Relation<
+      'api::chat-session.chat-session',
+      'oneToMany',
+      'api::message.message'
+    >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::chat-session.chat-session',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::chat-session.chat-session',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiMessageMessage extends Schema.CollectionType {
+  collectionName: 'messages';
+  info: {
+    singularName: 'message';
+    pluralName: 'messages';
+    displayName: 'Message';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    content: Attribute.Text & Attribute.Required;
+    chat_session: Attribute.Relation<
+      'api::message.message',
+      'manyToOne',
+      'api::chat-session.chat-session'
+    >;
+    user: Attribute.Enumeration<['YOU', 'SERVER']> & Attribute.Required;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::message.message',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::message.message',
       'oneToOne',
       'admin::user'
     > &
@@ -727,7 +812,6 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
   };
   options: {
     draftAndPublish: false;
-    timestamps: true;
   };
   attributes: {
     username: Attribute.String &
@@ -755,6 +839,11 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
       'plugin::users-permissions.user',
       'manyToOne',
       'plugin::users-permissions.role'
+    >;
+    chat_sessions: Attribute.Relation<
+      'plugin::users-permissions.user',
+      'oneToMany',
+      'api::chat-session.chat-session'
     >;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
@@ -831,6 +920,8 @@ declare module '@strapi/types' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'api::account.account': ApiAccountAccount;
+      'api::chat-session.chat-session': ApiChatSessionChatSession;
+      'api::message.message': ApiMessageMessage;
       'plugin::upload.file': PluginUploadFile;
       'plugin::upload.folder': PluginUploadFolder;
       'plugin::content-releases.release': PluginContentReleasesRelease;
